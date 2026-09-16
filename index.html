@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SS Mobile Shop - Mhow</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151c2c;
+            --accent-blue: #007bff;
+            --hover-blue: #0056b3;
+            --text-color: #ffffff;
+            --text-secondary: #a0aec0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--accent-blue);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-box input, .modal-box select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #0b0f19;
+            color: #fff;
+        }
+
+        .btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover { background: var(--hover-blue); }
+        .btn-full { width: 100%; margin-top: 10px; }
+
+        /* Header & Navbar */
+        header {
+            background: var(--card-bg);
+            padding: 15px 5%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-blue);
+            gap: 10px;
+        }
+
+        .logo { font-size: 22px; font-weight: bold; color: var(--accent-blue); }
+
+        .search-bar {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-blue);
+            background: #0b0f19;
+            color: #fff;
+            order: 3;
+        }
+
+        @media (min-width: 600px) {
+            .search-bar { order: 2; width: 40%; }
+        }
+
+        .container { padding: 20px 4%; }
+
+        /* Mobile Grid Fix */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-card:hover { border-color: var(--accent-blue); }
+
+        .product-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .product-card h3 { font-size: 15px; margin: 5px 0; }
+        .product-card p { font-size: 13px; color: var(--text-secondary); margin: 3px 0; }
+        .price { color: #28a745; font-weight: bold; font-size: 15px; }
+
+        /* Cart Section */
+        .cart-sec, .footer-sec {
+            background: var(--card-bg);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 10px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding: 10px 0;
+        }
+
+        .qty-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Step 1: Pincode Modal -->
+    <div id="pincodeModal" class="modal hidden">
+        <div class="modal-box">
+            <h2>SS Mobile Shop</h2>
+            <p>Ye Site sirf Mhow(local) ke liye hai kripya Mhow ka pincode dale</p>
+            <input type="text" id="pincodeInput" placeholder="Pincode Enter Karein">
+            <button class="btn btn-full" onclick="verifyPincode()">Submit</button>
+            <p id="pinError" style="color: #ff4d4d; display: none; margin-top: 10px;">Galat Pincode! Sirf Mhow ke liye available hai.</p>
+        </div>
+    </div>
+
+    <!-- Step 2: Account Registration Modal -->
+    <div id="accountModal" class="modal hidden">
+        <div class="modal-box">
+            <h2>Account Banayein</h2>
+            <input type="text" id="regName" placeholder="First Name">
+            <input type="text" id="regLastName" placeholder="Last Name">
+            <input type="email" id="regEmail" placeholder="Email Address">
+            <input type="tel" id="regPhone" placeholder="Phone Number">
+            <input type="text" id="regAddress" placeholder="Ghar Ka Pura Address">
+            <button class="btn btn-full" onclick="saveAccount()">Save & Continue</button>
+        </div>
+    </div>
+
+    <!-- Main Website Content -->
+    <div id="mainContent" class="hidden">
+        <header>
+            <div class="logo">SS Mobile</div>
+            <input type="text" class="search-bar" id="searchInput" onkeyup="searchProducts()" placeholder="Phone ka naam search karein...">
+            <div>Cart: <span id="cartCount" style="color: var(--accent-blue); font-weight: bold;">0</span></div>
+        </header>
+
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Latest Mobile Phones</h2>
+                <small id="userGreeting" style="color: var(--accent-blue);"></small>
+            </div>
+            
+            <div class="products-grid" id="productList"></div>
+
+            <!-- Cart Section -->
+            <div class="cart-sec" id="checkoutSec">
+                <h2>Aapka Cart</h2>
+                <div id="cartItems"><p>Cart khali hai</p></div>
+                <hr style="border-color: #222; margin: 15px 0;">
+                <h3>Total Amount: ₹<span id="cartTotal">0</span></h3>
+                
+                <label style="display:block; margin: 10px 0 5px;">Payment Options:</label>
+                <select id="paymentMethod" style="width: 100%; padding: 10px; background: #0b0f19; color: #fff; border: 1px solid #333; border-radius: 6px;">
+                    <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                    <option value="Online Payment">Online Payment (UPI/GPay: +91 2299117734)</option>
+                </select>
+                
+                <button class="btn btn-full" style="padding: 12px; margin-top: 15px; font-size: 16px;" onclick="placeOrder()">Order via WhatsApp</button>
+            </div>
+
+            <!-- Store Location -->
+            <div class="footer-sec">
+                <h2>Hamari Dukaan (Location)</h2>
+                <p><strong>Address:</strong> 478, Kishanganj, Mhow, Indore, Madhya Pradesh, India</p>
+                <p><strong>Contact Number:</strong> +91 2299117734</p>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14740.098864703815!2d75.7533!3d22.5539!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fcad86f1e8a9%3A0x6b8f368686616013!2sKishanganj%2C%20Mhow!5e0!3m2!1sen!2sin!4v1600000000000!5m2!1sen!2sin" width="100%" height="220" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+
+            <!-- Feedback & Updates -->
+            <div class="footer-sec">
+                <h2>Feedback / Direct Query</h2>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="fbText" placeholder="Koyi sawal ya feedback likhein..." style="flex: 1; padding: 10px; background: #0b0f19; color: #fff; border: 1px solid #333; border-radius: 6px;">
+                    <button class="btn" onclick="sendFeedback()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, name: "iPhone 15", brand: "Apple", price: 79900, storage: "128GB", img: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400" },
+            { id: 2, name: "Samsung Galaxy S24", brand: "Samsung", price: 74999, storage: "256GB", img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400" },
+            { id: 3, name: "OnePlus 12", brand: "OnePlus", price: 64999, storage: "256GB", img: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=400" },
+            { id: 4, name: "Vivo V30 Pro", brand: "Vivo", price: 41999, storage: "512GB", img: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400" },
+            { id: 5, name: "Oppo Reno 11", brand: "Oppo", price: 37999, storage: "256GB", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400" },
+            { id: 6, name: "Motorola Edge 50", brand: "Motorola", price: 29999, storage: "256GB", img: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400" }
+        ];
+
+        let userDetails = {};
+        let cart = [];
+        const SHOP_PHONE = "912299117734"; // Direct API string
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('ss_user');
+            if (savedUser) {
+                userDetails = JSON.parse(savedUser);
+                showMainContent();
+            } else {
+                document.getElementById('pincodeModal').classList.remove('hidden');
+            }
+        };
+
+        function verifyPincode() {
+            if (document.getElementById('pincodeInput').value.trim() === "453441") {
+                document.getElementById('pincodeModal').classList.add('hidden');
+                document.getElementById('accountModal').classList.remove('hidden');
+            } else {
+                document.getElementById('pinError').style.display = "block";
+            }
+        }
+
+        function saveAccount() {
+            userDetails = {
+                firstName: document.getElementById('regName').value,
+                lastName: document.getElementById('regLastName').value,
+                email: document.getElementById('regEmail').value,
+                phone: document.getElementById('regPhone').value,
+                address: document.getElementById('regAddress').value
+            };
+
+            if(!userDetails.firstName || !userDetails.phone || !userDetails.address) {
+                alert("Kripya Naam, Phone Number aur Address zarur bharein!");
+                return;
+            }
+
+            localStorage.setItem('ss_user', JSON.stringify(userDetails));
+
+            document.getElementById('accountModal').classList.add('hidden');
+            showMainContent();
+        }
+
+        function showMainContent() {
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('userGreeting').innerText = `Welcome, ${userDetails.firstName}!`;
+            renderProducts(products);
+        }
+
+        function renderProducts(items) {
+            const container = document.getElementById('productList');
+            container.innerHTML = "";
+            items.forEach((p) => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <img src="${p.img}" alt="${p.name}">
+                            <h3>${p.name}</h3>
+                            <p>${p.brand} | ${p.storage}</p>
+                            <p class="price">₹${p.price.toLocaleString('en-IN')}</p>
+                        </div>
+                        <button class="btn btn-full" onclick="addToCart(${p.id})">Add to Cart</button>
+                    </div>
+                `;
+            });
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query));
+            renderProducts(filtered);
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateQty(id, change) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += change;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            document.getElementById('cartCount').innerText = totalCount;
+            document.getElementById('cartTotal').innerText = totalPrice.toLocaleString('en-IN');
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = "<p>Cart khali hai</p>";
+                return;
+            }
+
+            cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small>₹${item.price.toLocaleString('en-IN')} x ${item.qty}</small>
+                    </div>
+                    <div>
+                        <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                        <span style="margin: 0 5px;">${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function placeOrder() {
+            if(cart.length === 0) {
+                alert("Cart khali hai, pehle koi phone add karein!");
+                return;
+            }
+
+            const payment = document.getElementById('paymentMethod').value;
+            const itemsList = cart.map(i => `${i.name} (${i.storage}) x${i.qty}`).join('%0A- ');
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            const whatsappMessage = 
+                `*NEW ORDER - SS MOBILE SHOP*%0A%0A` +
+                `*Customer Details:*%0A` +
+                `Name: ${userDetails.firstName} ${userDetails.lastName}%0A` +
+                `Phone: ${userDetails.phone}%0A` +
+                `Address: ${userDetails.address}%0A%0A` +
+                `*Order Items:*%0A- ${itemsList}%0A%0A` +
+                `*Total Bill:* ₹${totalPrice.toLocaleString('en-IN')}%0A` +
+                `*Payment Method:* ${payment}%0A%0A` +
+                `*Store Info:*%0A` +
+                `Address: 478, Kishanganj, Mhow%0A` +
+                `Contact: +91 2299117734%0A` +
+                `Expected Delivery: 24 Hours (Local Mhow)`;
+
+            window.open(`https://wa.me/${SHOP_PHONE}?text=${whatsappMessage}`, '_blank');
+        }
+
+        function sendFeedback() {
+            const msg = document.getElementById('fbText').value;
+            if(!msg) return alert("Feedback box khali hai!");
+            const text = `*New Query/Feedback from Website:*%0A${msg}%0A%0AFrom: ${userDetails.firstName || 'Customer'} (${userDetails.phone || 'N/A'})`;
+            window.open(`https://wa.me/${SHOP_PHONE}?text=${text}`, '_blank');
+        }
+    </script>
+</body>
+  </html>
+  
